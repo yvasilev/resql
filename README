@@ -1,0 +1,60 @@
+tesql
+=====
+
+It is a text based SQL like backend with a nice object oriented interface.
+
+Description:
+------------
+
+tesql is a pure python_ implementation of a relational database that uses
+plain text files to store the information.  The exact way the information
+is stored can be customized on a per table/entity level, defaulting to
+storing each row in a separate `RFC 822`_ type .conf file inside a directory
+named after the table/entity name.
+
+The database supports many of the expected features that a modern ORM
+should provide and has some special optimizations for usage as a
+configuration system for any project.  This is done by mapping an entity
+to a file (rather than to a directory) and defining it in a way that it
+can have only one row.
+
+Examples:
+---------
+
+Using tesql as a normal database::
+
+ from tesql.types import *
+ from tesql.orm import *
+
+ class Person (Entity):
+     firstname = Field(String)
+     surname = Field(String)
+
+ homer = Person(firstname='Homer', surname='Simpson')
+
+Using tesql as a cofiguration system::
+
+ from tesql.types import *
+ from tesql.orm import *
+ from tesql.orm.decorators import location
+
+ @location('/etc/package.conf')  # python >= 2.6
+ class Settings (Entity):
+     pk = Field(Integer, choices=[0], primary_key=True, virtual=True)
+     user = Field(String)
+
+ Settings = location('/etc/package.conf')(Settings)  # python < 2.6
+
+License:
+--------
+
+tesql is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option)
+any later version.   See the file COPYING for exact copying conditions.
+
+Links:
+------
+
+.. _python: http://www.python.org/
+.. _`RFC 822`: http://tools.ietf.org/html/rfc822.html
