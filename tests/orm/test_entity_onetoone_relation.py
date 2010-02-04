@@ -171,6 +171,33 @@ class TestEntityOneToOne (TestCase):
         self.assertTrue(a.entity_has_foreign_key)
         self.assertEqual(a.entity_foreign_key_entity, Person)
 
+    def test_is_foreign_key_recursive (self):
+        class Person (Entity):
+            firstname = Field(String)
+            surname = Field(String)
+
+        class Account (Entity):
+            homedir = Field(String)
+            person = Field(OneToOne, entity='Person', primary_key=True)
+
+        class Quota (Entity):
+            size = Field(Integer, default=100000)
+            account = Field(OneToOne, entity=Account, primary_key=True)
+
+        self.assertTrue(Account.entity_has_foreign_key)
+        self.assertEqual(Account.entity_foreign_key_entity, Person)
+        self.assertTrue(Quota.entity_has_foreign_key)
+        self.assertEqual(Quota.entity_foreign_key_entity, Account)
+
+        p = Person(firstname='Homer', surname='Simpson')
+        a = Account(homedir='/home/hsimpson', person=p)
+        q = Quota(account=a)
+
+        self.assertTrue(a.entity_has_foreign_key)
+        self.assertEqual(a.entity_foreign_key_entity, Person)
+        self.assertTrue(q.entity_has_foreign_key)
+        self.assertEqual(q.entity_foreign_key_entity, Account)
+
     def test_onetoone_inverse_relation (self):
         class Person (Entity):
             firstname = Field(String)

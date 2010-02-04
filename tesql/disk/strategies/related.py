@@ -151,13 +151,18 @@ class Related (BaseDiskStrategy):
         tesql.orm.Session.default.modify(instance, changed=False)
 
         for entity in tesql.orm.Entity.entities.itervalues():
-            if entity.entity_foreign_key_entity == type(instance):
-                if tesql.orm.Session.default.has(entity, instance.entity_pk_value):
-                    inst = tesql.orm.Session.default.get(entity,
-                                                         instance.entity_pk_value)
+            if entity.entity_has_foreign_key:
+                fk = entity
+                while fk.entity_has_foreign_key:
+                    fk = fk.entity_foreign_key_entity
+                if fk == type(instance):
+                    if tesql.orm.Session.default.has(entity,
+                                                     instance.entity_pk_value):
+                        inst = tesql.orm.Session.default.get(entity,
+                                                             instance.entity_pk_value)
 
-                    write_object(inst.entity_as_dictionary, fileobj)
-                    tesql.orm.Session.default.modify(inst, changed=False)
+                        write_object(inst.entity_as_dictionary, fileobj)
+                        tesql.orm.Session.default.modify(inst, changed=False)
         fileobj.close()
 
 

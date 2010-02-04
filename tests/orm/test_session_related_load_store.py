@@ -327,3 +327,66 @@ class TestSessionRelatedLoadStore (TestCase):
         self.assertTrue(isinstance(na2, Account))
         self.assertEqual(na2.entity_name, 'Account')
         self.assertEqual(na2.homedir, '/home/bsimpson')
+
+    def test_session_store_recursive (self):
+        class Person (Entity):
+            pk = Field(Indexer, autoincrement=True, primary_key=True, virtual=True)
+            firstname = Field(String)
+            surname = Field(String)
+
+        class Account (Entity):
+            homedir = Field(String)
+            person = Field(OneToOne, entity=Person, primary_key=True, virtual=True)
+
+        class Quota (Entity):
+            size = Field(Integer, default=100000)
+            account = Field(OneToOne, entity=Account, primary_key=True, virtual=True)
+
+        p1 = Person(firstname='Homer', surname='Simpson')
+        p2 = Person(firstname='Bart', surname='Simpson')
+
+        a1 = Account(homedir='/home/hsimpson', person=p1)
+        a2 = Account(homedir='/home/bsimpson', person=p2)
+
+        q1 = Quota(account=a1)
+        q2 = Quota(size=200000, account=a2)
+
+        self.assertTrue(Session.default._stack.contains(p1))
+        self.assertTrue(Session.default._stack.contains(p2))
+        self.assertTrue(Session.default._stack.contains(a1))
+        self.assertTrue(Session.default._stack.contains(a2))
+        self.assertTrue(Session.default._stack.contains(q1))
+        self.assertTrue(Session.default._stack.contains(q2))
+
+        self.assertFalse(os.path.isfile(os.path.join(self.path, 'Person', '0.conf')))
+        self.assertFalse(os.path.isfile(os.path.join(self.path, 'Person', '1.conf')))
+        self.assertFalse(os.path.isfile(os.path.join(self.path, 'Account', '0.conf')))
+        self.assertFalse(os.path.isfile(os.path.join(self.path, 'Account', '1.conf')))
+        self.assertFalse(os.path.isfile(os.path.join(self.path, 'Quota', '0.conf')))
+        self.assertFalse(os.path.isfile(os.path.join(self.path, 'Quota', '1.conf')))
+
+        Session.default.store(p1)
+        Session.default.store(a2)
+
+        self.assertFalse(Session.default._stack.contains(p1))
+        self.assertFalse(Session.default._stack.contains(p2))
+        self.assertFalse(Session.default._stack.contains(a1))
+        self.assertFalse(Session.default._stack.contains(a2))
+        self.assertFalse(Session.default._stack.contains(q1))
+        self.assertFalse(Session.default._stack.contains(q2))
+
+        self.assertTrue(os.path.isfile(os.path.join(self.path, 'Person', '0.conf')))
+        self.assertTrue(os.path.isfile(os.path.join(self.path, 'Person', '1.conf')))
+        self.assertFalse(os.path.isfile(os.path.join(self.path, 'Account', '0.conf')))
+        self.assertFalse(os.path.isfile(os.path.join(self.path, 'Account', '1.conf')))
+        self.assertFalse(os.path.isfile(os.path.join(self.path, 'Quota', '0.conf')))
+        self.assertFalse(os.path.isfile(os.path.join(self.path, 'Quota', '1.conf')))
+
+        self.assertEqual(open(os.path.join(self.path, 'Person', '0.conf'), 'rU').read(),
+                         '\n[Person]\n\nfirstname: Homer\nsurname: Simpson\n'
+                         '\n[Account]\n\nhomedir: /home/hsimpson\n'
+                         '\n[Quota]\n\nsize: 100000\n')
+        self.assertEqual(open(os.path.join(self.path, 'Person', '1.conf'), 'rU').read(),
+                         '\n[Person]\n\nfirstname: Bart\nsurname: Simpson\n'
+                         '\n[Account]\n\nhomedir: /home/bsimpson\n'
+                         '\n[Quota]\n\nsize: 200000\n')
