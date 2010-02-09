@@ -24,6 +24,7 @@ from tesql.types import *
 class TestEntityQueryManyToOne (TestCase):
 
     def setUp (self):
+        Entity.entities = {}
         Session.default.expunge()
 
     def test_querymany_definition_by_class (self):

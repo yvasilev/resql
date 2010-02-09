@@ -82,7 +82,10 @@ class EntityMeta (type):
         for name, field in cls._fields.iteritems():
             # FIXME: don't access private memeber Field._field
             if isinstance(field._field, field_type):
-                return name
+                if field._field._entity == None:
+                    raise EnvironmentError("Waiting for '%s' to be defined" % name)
+                elif field._field._entity == kwargs['entity']:
+                    return name
 
         if field_name in cls._fields:
             raise NameError("%s already has a field '%s' and it's not %s" %

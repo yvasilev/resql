@@ -171,6 +171,36 @@ class TestEntityOneToOne (TestCase):
         self.assertTrue(a.entity_has_foreign_key)
         self.assertEqual(a.entity_foreign_key_entity, Person)
 
+    def test_is_multiple_foreign_keys (self):
+        class Person (Entity):
+            firstname = Field(String)
+            surname = Field(String)
+
+        class Account (Entity):
+            homedir = Field(String)
+            person = Field(OneToOne, entity='Person', primary_key=True)
+
+        class Room (Entity):
+            size = Field(Integer)
+            person = Field(OneToOne, entity=Person, primary_key=True)
+
+        p = Person(firstname='Homer', surname='Simpson')
+
+        self.assertTrue(Account.entity_has_foreign_key)
+        self.assertEqual(Account.entity_foreign_key_entity, Person)
+        self.assertTrue(Room.entity_has_foreign_key)
+        self.assertEqual(Room.entity_foreign_key_entity, Person)
+
+        a = Account(homedir='/home/hsimpson', person=p)
+
+        self.assertTrue(a.entity_has_foreign_key)
+        self.assertEqual(a.entity_foreign_key_entity, Person)
+
+        r = Room(size=22, person=p)
+
+        self.assertTrue(r.entity_has_foreign_key)
+        self.assertEqual(r.entity_foreign_key_entity, Person)
+
     def test_is_foreign_key_recursive (self):
         class Person (Entity):
             firstname = Field(String)
@@ -222,3 +252,53 @@ class TestEntityOneToOne (TestCase):
         a = Account(homedir='/home/hsimpson', person=p)
 
         self.assertEqual(p.account, a)
+
+    def test_onetoone_multiple_inverse_relations (self):
+        class Person (Entity):
+            firstname = Field(String)
+            surname = Field(String)
+
+        p = Person(firstname='Homer', surname='Simpson')
+
+        self.assertFalse(hasattr(Person, 'account'))
+        self.assertFalse(hasattr(p, 'account'))
+
+        self.assertFalse(hasattr(Person, 'room'))
+        self.assertFalse(hasattr(p, 'room'))
+
+        class Account (Entity):
+            homedir = Field(String)
+            person = Field(OneToOne, entity='Person', primary_key=True)
+
+        p = Person(firstname='Homer', surname='Simpson')
+
+        self.assertTrue(hasattr(Person, 'account'))
+        self.assertTrue(hasattr(p, 'account'))
+
+        self.assertFalse(hasattr(Person, 'room'))
+        self.assertFalse(hasattr(p, 'room'))
+
+        class Room (Entity):
+            size = Field(Integer)
+            person = Field(OneToOne, entity=Person, primary_key=True)
+
+        p = Person(firstname='Homer', surname='Simpson')
+
+        self.assertTrue(hasattr(Person, 'account'))
+        self.assertTrue(hasattr(p, 'account'))
+
+        self.assertTrue(hasattr(Person, 'room'))
+        self.assertTrue(hasattr(p, 'room'))
+
+        self.assertEqual(p.account, None)
+        self.assertEqual(p.room, None)
+
+        a = Account(homedir='/home/hsimpson', person=p)
+
+        self.assertEqual(p.account, a)
+        self.assertEqual(p.room, None)
+
+        r = Room(size=22, person=p)
+
+        self.assertEqual(p.account, a)
+        self.assertEqual(p.room, r)

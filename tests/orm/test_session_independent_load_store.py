@@ -28,6 +28,7 @@ from tesql.disk.strategies import Independent
 class TestSessionIndependentLoadStore (TestCase):
 
     def setUp (self):
+        Entity.entities = {}
         self.path = '/tmp/test.tesqldb'
         Session(strategy=Independent).be_default()
         Session.default.bind(self.path)
