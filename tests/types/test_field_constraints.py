@@ -408,3 +408,14 @@ class TestFieldConstraints (TestCase):
         p = Person(firstname='Homer', surname='Simpson')
 
         self.assertRaises(ValueError, Person, firstname='Carl', surname='Carlson')
+
+    def test_choices_not_singleton (self):
+        class Person (Entity):
+            pk = Field(Indexer, primary_key=True, autoincrement=True, choices=(0, 1))
+            firstname = Field(String)
+            surname = Field(String)
+
+        p1 = Person(firstname='Homer', surname='Simpson')
+        p2 = Person(firstname='Bart', surname='Simpson')
+
+        self.assertRaises(ValueError, Person, firstname='Carl', surname='Carlson')

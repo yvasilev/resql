@@ -62,7 +62,7 @@ class Field (object):
         self._autoincrement = kwargs.pop('autoincrement', False)
         self._default = kwargs.pop('default', None)
 
-        self._singleton = self.is_primary_key and len(kwargs.get('choices', []))
+        self._singleton = self.is_primary_key and len(kwargs.get('choices', [])) == 1
 
         self._name = name
 
