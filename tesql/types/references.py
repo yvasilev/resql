@@ -15,11 +15,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import __builtin__
+
 import tesql
 
 from tesql.query import Filter
 
 from base import BaseReference
+from base import exportedmethod
 
 
 class ReferenceOne (BaseReference):
@@ -29,17 +32,12 @@ class ReferenceOne (BaseReference):
 
         self.set_data(None, check=False)
 
-    @staticmethod
-    def register_methods (field_type):
-        super(ReferenceOne, ReferenceOne).register_methods(field_type)
+    @exportedmethod
+    def has (self, constraint, *constraints):
+        for extra in constraints:
+            constraint = constraint & extra
 
-        def has (self, constraint, *constraints):
-            for extra in constraints:
-                constraint = constraint & extra
-
-            return Filter(lambda x: constraint(x.field_get(self.name)))
-
-        field_type.has = has.__get__(None, field_type)
+        return Filter(lambda x: constraint(x.field_get(self.name)))
 
     def get_data (self, instance=None):
         if super(ReferenceOne, self).get_data() == None:
@@ -93,6 +91,12 @@ class ReferenceMany (BaseReference):
 
         return all(self[i] == other[i] for i in xrange(len(self)))
 
+    def eq (self, other):
+        if len(self) != len(other):
+            return False
+
+        return all(self[i] == other[i] for i in xrange(len(self)))
+
     def __ne__ (self, other):
         return not self == other
 
@@ -115,33 +119,26 @@ class ReferenceMany (BaseReference):
 
         self._data.remove(pk)
 
-    @staticmethod
-    def register_methods (field_type):
-        super(ReferenceMany, ReferenceMany).register_methods(field_type)
+    @exportedmethod
+    def any (self, constraint, *constraints):
+        for extra in constraints:
+            constraint = constraint & extra
 
-        import __builtin__
+        return Filter(lambda x: __builtin__.any(constraint(inst) for inst in \
+                                    x.field_get(self.name)))
 
-        def any (self, constraint, *constraints):
-            for extra in constraints:
-                constraint = constraint & extra
+    @exportedmethod
+    def all (self, constraint, *constraints):
+        for extra in constraints:
+            constraint = constraint & extra
 
-            return Filter(lambda x: __builtin__.any(constraint(inst) for inst in \
-                                        x.field_get(self.name)))
+        return Filter(lambda x: __builtin__.all(constraint(inst) for inst in \
+                                    x.field_get(self.name)))
 
-        def all (self, constraint, *constraints):
-            for extra in constraints:
-                constraint = constraint & extra
-
-            return Filter(lambda x: __builtin__.all(constraint(inst) for inst in \
-                                        x.field_get(self.name)))
-
-        def contains (self, instance, *instances):
-            return Filter(lambda x: __builtin__.all(inst in x.field_get(self.name) \
-                                    for inst in (instance,) + instances))
-
-        field_type.any = any.__get__(None, field_type)
-        field_type.all = all.__get__(None, field_type)
-        field_type.contains = contains.__get__(None, field_type)
+    @exportedmethod
+    def contains (self, instance, *instances):
+        return Filter(lambda x: __builtin__.all(inst in x.field_get(self.name) \
+                                for inst in (instance,) + instances))
 
     def get_data (self, instance=None):
         return self
@@ -165,89 +162,68 @@ class OneToOne (ReferenceOne):
     def __init__ (self, *args, **kw):
         super(OneToOne, self).__init__(*args, **kw)
 
-    @staticmethod
-    def register_methods (field_type):
-        super(OneToOne, OneToOne).register_methods(field_type)
+    @exportedmethod
+    def inverse_name (self, name):
+        return name
 
-        def inverse_name (self, name):
-            return name
+    @exportedmethod
+    def inverse_type (self):
+        return QueryOneToOne
 
-        def inverse_type (self):
-            return QueryOneToOne
-
-        field_type.inverse_name = inverse_name.__get__(None, field_type)
-        field_type.inverse_type = inverse_type.__get__(None, field_type)
 
 class ManyToOne (ReferenceOne):
 
     def __init__ (self, *args, **kw):
         super(ManyToOne, self).__init__(*args, **kw)
 
-    @staticmethod
-    def register_methods (field_type):
-        super(ManyToOne, ManyToOne).register_methods(field_type)
+    @exportedmethod
+    def inverse_name (self, name):
+        return name + 's'
 
-        def inverse_name (self, name):
-            return name + 's'
+    @exportedmethod
+    def inverse_type (self):
+        return QueryManyToOne
 
-        def inverse_type (self):
-            return QueryManyToOne
-
-        field_type.inverse_name = inverse_name.__get__(None, field_type)
-        field_type.inverse_type = inverse_type.__get__(None, field_type)
 
 class OneToMany (ReferenceMany):
 
     def __init__ (self, *args, **kw):
         super(OneToMany, self).__init__(*args, **kw)
 
-    @staticmethod
-    def register_methods (field_type):
-        super(OneToMany, OneToMany).register_methods(field_type)
+    @exportedmethod
+    def inverse_name (self, name):
+        return name
 
-        def inverse_name (self, name):
-            return name
+    @exportedmethod
+    def inverse_type (self):
+        return QueryOneToMany
 
-        def inverse_type (self):
-            return QueryOneToMany
-
-        field_type.inverse_name = inverse_name.__get__(None, field_type)
-        field_type.inverse_type = inverse_type.__get__(None, field_type)
 
 class ManyToMany (ReferenceMany):
 
     def __init__ (self, *args, **kw):
         super(ManyToMany, self).__init__(*args, **kw)
 
-    @staticmethod
-    def register_methods (field_type):
-        super(ManyToMany, ManyToMany).register_methods(field_type)
+    @exportedmethod
+    def inverse_name (self, name):
+        return name + 's'
 
-        def inverse_name (self, name):
-            return name + 's'
+    @exportedmethod
+    def inverse_type (self):
+        return QueryManyToMany
 
-        def inverse_type (self):
-            return QueryManyToMany
-
-        field_type.inverse_name = inverse_name.__get__(None, field_type)
-        field_type.inverse_type = inverse_type.__get__(None, field_type)
 
 class QueryOne (BaseReference):
 
     def __init__ (self, *args, **kw):
         super(QueryOne, self).__init__(*args, **kw)
 
-    @staticmethod
-    def register_methods (field_type):
-        super(QueryOne, QueryOne).register_methods(field_type)
+    @exportedmethod
+    def has (self, constraint, *constraints):
+        for extra in constraints:
+            constraint = constraint & extra
 
-        def has (self, constraint, *constraints):
-            for extra in constraints:
-                constraint = constraint & extra
-
-            return Filter(lambda x: constraint(x.field_get(self.name)))
-
-        field_type.has = has.__get__(None, field_type)
+        return Filter(lambda x: constraint(x.field_get(self.name)))
 
     def validate_data (self, instance=None):
         return None
@@ -316,33 +292,26 @@ class QueryMany (BaseReference):
     def __ne__ (self, other):
         return not self == other
 
-    @staticmethod
-    def register_methods (field_type):
-        super(QueryMany, QueryMany).register_methods(field_type)
+    @exportedmethod
+    def any (self, constraint, *constraints):
+        for extra in constraints:
+            constraint = constraint & extra
 
-        import __builtin__
+        return Filter(lambda x: __builtin__.any(constraint(inst) for inst in \
+                                    x.field_get(self.name)))
 
-        def any (self, constraint, *constraints):
-            for extra in constraints:
-                constraint = constraint & extra
+    @exportedmethod
+    def all (self, constraint, *constraints):
+        for extra in constraints:
+            constraint = constraint & extra
 
-            return Filter(lambda x: __builtin__.any(constraint(inst) for inst in \
-                                        x.field_get(self.name)))
+        return Filter(lambda x: __builtin__.all(constraint(inst) for inst in \
+                                    x.field_get(self.name)))
 
-        def all (self, constraint, *constraints):
-            for extra in constraints:
-                constraint = constraint & extra
-
-            return Filter(lambda x: __builtin__.all(constraint(inst) for inst in \
-                                        x.field_get(self.name)))
-
-        def contains (self, instance, *instances):
-            return Filter(lambda x: __builtin__.all(inst in x.field_get(self.name) \
-                                    for inst in (instance,) + instances))
-
-        field_type.any = any.__get__(None, field_type)
-        field_type.all = all.__get__(None, field_type)
-        field_type.contains = contains.__get__(None, field_type)
+    @exportedmethod
+    def contains (self, instance, *instances):
+        return Filter(lambda x: __builtin__.all(inst in x.field_get(self.name) \
+                                for inst in (instance,) + instances))
 
     def validate_data (self, instance=None):
         self._instance = instance

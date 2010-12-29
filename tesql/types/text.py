@@ -17,7 +17,7 @@
 
 from tesql.query import Filter
 
-from base import BaseSortable
+from base import BaseSortable, exportedmethod
 
 class String (BaseSortable):
 
@@ -28,22 +28,17 @@ class String (BaseSortable):
 
         self.set_data(u'')
 
-    @staticmethod
-    def register_methods (field_type):
-        super(String, String).register_methods(field_type)
+    @exportedmethod
+    def startswith (self, prefix):
+        return Filter(lambda x: x.field_get(self.name).startswith(prefix))
 
-        def startswith (self, prefix):
-            return Filter(lambda x: x.field_get(self.name).startswith(prefix))
+    @exportedmethod
+    def contains (self, other):
+        return Filter(lambda x: other in x.field_get(self.name))
 
-        def contains (self, other):
-            return Filter(lambda x: other in x.field_get(self.name))
-
-        def endswith (self, suffix):
-            return Filter(lambda x: x.field_get(self.name).endswith(suffix))
-
-        field_type.startswith = startswith.__get__(None, field_type)
-        field_type.contains = contains.__get__(None, field_type)
-        field_type.endswith = endswith.__get__(None, field_type)
+    @exportedmethod
+    def endswith (self, suffix):
+        return Filter(lambda x: x.field_get(self.name).endswith(suffix))
 
 
 from tesql import __author__, __license__, __version__

@@ -350,6 +350,9 @@ class TestQueryRelations (TestCase):
             address = Field(String)
             person = Field(OneToMany, entity=Person)
 
+            def __repr__ (self):
+                return 'Home("%s", "%s")' % (self.address, self.person)
+
         p1 = Person(firstname='Homer', surname='Simpson')
         p2 = Person(firstname='Bart', surname='Simpson')
         p3 = Person(firstname='Ned', surname='Flanders')

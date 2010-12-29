@@ -23,6 +23,10 @@ from tesql.disk.objects import BaseObject
 from tesql.query import Filter
 
 
+def exportedmethod (func):
+    func._exported = True
+    return staticmethod(func)
+
 class BaseType (object):
 
     def __init__ (self):
@@ -44,6 +48,10 @@ class BaseType (object):
         self._outcoding = state['outcoding']
         self._data = state['data']
         self._constraints = state['constraints']
+
+    #@exportedmethod
+    #def __eq__ (self, other):
+    #    return Filter(lambda x: x.field_get(self.name) == other)
 
     @staticmethod
     def register_methods (field_type):
@@ -104,18 +112,15 @@ class BaseSortable (BaseType):
     def __init__ (self, *args, **kw):
         super(BaseSortable, self).__init__(*args, **kw)
 
-    @staticmethod
-    def register_methods (field_type):
-        super(BaseSortable, BaseSortable).register_methods(field_type)
+    @exportedmethod
+    def ascending (self, x, y):
+        #return lambda x, y: cmp(x.field_get(self.name), y.field_get(self.name))
+        return cmp(x.field_get(self.name), y.field_get(self.name))
 
-        def ascending (self):
-            return lambda x, y: cmp(x.field_get(self.name), y.field_get(self.name))
-
-        def descending (self):
-            return lambda x, y: -cmp(x.field_get(self.name), y.field_get(self.name))
-
-        field_type.ascending = property(ascending).__get__(None, field_type)
-        field_type.descending = property(descending).__get__(None, field_type)
+    @exportedmethod
+    def descending (self, x, y):
+        #return lambda x, y: -cmp(x.field_get(self.name), y.field_get(self.name))
+        return -cmp(x.field_get(self.name), y.field_get(self.name))
 
 class BaseReference (BaseType):
 

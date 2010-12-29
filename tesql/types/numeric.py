@@ -17,7 +17,7 @@
 
 from tesql.query import Filter
 
-from base import BaseSortable
+from base import BaseSortable, exportedmethod
 
 
 class Integer (BaseSortable):
@@ -27,26 +27,21 @@ class Integer (BaseSortable):
 
         self.set_data(0)
 
-    @staticmethod
-    def register_methods (field_type):
-        super(Integer, Integer).register_methods(field_type)
+    @exportedmethod
+    def __lt__ (self, other):
+        return Filter(lambda x: x.field_get(self.name) < other)
 
-        def __lt__ (self, other):
-            return Filter(lambda x: x.field_get(self.name) < other)
+    @exportedmethod
+    def __le__ (self, other):
+        return Filter(lambda x: x.field_get(self.name) <= other)
 
-        def __le__ (self, other):
-            return Filter(lambda x: x.field_get(self.name) <= other)
+    @exportedmethod
+    def __ge__ (self, other):
+        return Filter(lambda x: x.field_get(self.name) >= other)
 
-        def __ge__ (self, other):
-            return Filter(lambda x: x.field_get(self.name) >= other)
-
-        def __gt__ (self, other):
-            return Filter(lambda x: x.field_get(self.name) > other)
-
-        field_type.__lt__ = __lt__.__get__(None, field_type)
-        field_type.__le__ = __le__.__get__(None, field_type)
-        field_type.__ge__ = __ge__.__get__(None, field_type)
-        field_type.__gt__ = __gt__.__get__(None, field_type)
+    @exportedmethod
+    def __gt__ (self, other):
+        return Filter(lambda x: x.field_get(self.name) > other)
 
     def unmarshal (self, value):
         return int(value.decode(self._incoding))

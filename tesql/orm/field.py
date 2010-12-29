@@ -15,6 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import inspect
 
 from tesql.types import OneToOne
 from tesql.types.base import BaseType
@@ -38,7 +39,13 @@ class Field (object):
 
         if name not in Field._subclasses:
             Field._subclasses[name] = type(name, (Field,), {})
+            # FIXME: Migrate to exportedmethod and stop calling register_methods
             field_type.register_methods(Field._subclasses[name])
+            # Find @exportedmethod fuctions
+            for func in (m for name, m in inspect.getmembers(field_type,
+                         inspect.isfunction) if hasattr(m, '_exported')):
+                setattr(Field._subclasses[name], func.func_name,
+                        func.__get__(None, Field._subclasses[name]))
 
         return super(Field, Field._subclasses[name]).__new__(
                         Field._subclasses[name])

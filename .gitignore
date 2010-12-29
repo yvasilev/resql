@@ -1,2 +1,6 @@
 *.pyc
 *.pyo
+TODO
+deb_dist/
+tesql.egg-info/
+
