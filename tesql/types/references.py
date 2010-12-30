@@ -73,7 +73,7 @@ class ReferenceMany (BaseReference):
         return tesql.orm.Session.default.get(self._entity, self._data[pos])
 
     def __setitem__ (self, pos, instance):
-        self._data.__setitem__(pos, self.validate(instance.entity_pk_value))
+        self._data.__setitem__(pos, self.validate(instance.pk))
 
     def __delitem__ (self, pos):
         self._data.__delitem__(pos)
@@ -83,7 +83,7 @@ class ReferenceMany (BaseReference):
             yield tesql.orm.Session.default.get(self._entity, pk)
 
     def __contains__ (self, instance):
-        return self._data.__contains__(instance.entity_pk_value)
+        return self._data.__contains__(instance.pk)
 
     def __eq__ (self, other):
         if len(self) != len(other):
@@ -104,7 +104,7 @@ class ReferenceMany (BaseReference):
         if not isinstance(value, tesql.orm.Entity):
             pk = value
         else:
-            pk = value.entity_pk_value
+            pk = value.pk
 
         if check:
             self._data.append(self.validate(pk))
@@ -115,7 +115,7 @@ class ReferenceMany (BaseReference):
         if not isinstance(value, tesql.orm.Entity):
             pk = value
         else:
-            pk = value.entity_pk_value
+            pk = value.pk
 
         self._data.remove(pk)
 

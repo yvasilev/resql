@@ -140,11 +140,7 @@ class EntityMeta (type):
 
     @property
     def entity_pk (cls):
-        return cls._fields[cls.entity_pk_name]
-
-    @property
-    def entity_pk_name (cls):
-        return cls._pk_name
+        return cls._fields[cls.meta.pk.name]
 
     @property
     def entity_has_foreign_key (cls):
@@ -205,7 +201,7 @@ class Entity (object):
         if self.meta.name != other.meta.name:
             return False
 
-        return self.entity_pk_value == other.entity_pk_value
+        return self.pk == other.pk
 
     def __ne__ (self, other):
         return not self.__eq__(other)
@@ -221,18 +217,14 @@ class Entity (object):
 
     @property
     def entity_pk (self):
-        return self._fields[self.entity_pk_name]
-
-    @property
-    def entity_pk_name(self):
-        return type(self).entity_pk_name
+        return self._fields[self.meta.pk.name]
 
     @property
     def entity_pk_value (self):
         if self.entity_has_foreign_key and self.entity_pk.get_data() != None:
-            return self.entity_pk.get_data().entity_pk_value
+            return self.pk.entity_pk_value
         else:
-            return self.entity_pk.get_data()
+            return self.pk
 
     @property
     def entity_has_foreign_key (self):

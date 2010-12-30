@@ -65,7 +65,7 @@ class Independent (BaseDiskStrategy):
 
     def get_location (self, entity, pk=None):
         if isinstance(entity, tesql.orm.Entity):
-            pk = entity.entity_pk_value
+            pk = entity.pk
 
         if (entity.meta.name, pk) in self._locations:
             location = self._locations[entity.meta.name, pk]

@@ -94,7 +94,7 @@ class SortingQuery (Query):
         iterable = (tesql.orm.Session.default.get(e, pk) for e, pk in iterable)
         for sorter in reversed(self._sorters):
             iterable = sorted(iterable, sorter)
-        iterable = ((type(x), x.entity_pk_value) for x in iterable)
+        iterable = ((type(x), x.pk) for x in iterable)
         for e, pk in iterable:
             yield (e, pk)
 

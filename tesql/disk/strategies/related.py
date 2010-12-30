@@ -70,7 +70,7 @@ class Related (BaseDiskStrategy):
             return self.get_location(entity, pk)
 
         if isinstance(entity, tesql.orm.Entity):
-            pk = entity.entity_pk_value
+            pk = entity.pk
 
         if (entity.meta.name, pk) in self._locations:
             location = self._locations[entity.meta.name, pk]

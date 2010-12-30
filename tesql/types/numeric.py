@@ -53,8 +53,8 @@ class Indexer (Integer):
         super(Indexer, self).__init__(*args, **kw)
 
     def set_next (self, entity):
-        res = entity.query.sort_by(entity.entity_pk.descending).one()
-        self.set_data(res and res.entity_pk_value + 1 or 0)
+        res = entity.query.sort_by(entity.meta.pk.descending).one()
+        self.set_data(res and res.pk + 1 or 0)
 
 
 from tesql import __author__, __license__, __version__
