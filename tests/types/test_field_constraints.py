@@ -42,18 +42,16 @@ class TestFieldConstraints (TestCase):
         self.assertEqual(Person.firstname.name, 'firstname')
         self.assertEqual(Person.surname.name, 'surname')
 
-        self.assertEqual(Person.entity_pk_name, 'pk')
+        self.assertEqual(Person.meta.pk.name, 'pk')
 
         p1 = Person(pk=1, firstname='Homer')
         p2 = Person(pk=2, firstname='Bart')
 
         self.assertEqual(p1.pk, 1)
-        self.assertEqual(p1.entity_pk_name, 'pk')
-        self.assertEqual(p1.entity_pk_value, 1)
+        self.assertEqual(p1.meta.pk.name, 'pk')
 
         self.assertEqual(p2.pk, 2)
-        self.assertEqual(p2.entity_pk_name, 'pk')
-        self.assertEqual(p2.entity_pk_value, 2)
+        self.assertEqual(p2.meta.pk.name, 'pk')
 
     def test_explicit_primary_key_with_explicit_not_pks (self):
         class Person (Entity):
@@ -69,45 +67,27 @@ class TestFieldConstraints (TestCase):
         self.assertEqual(Person.firstname.name, 'firstname')
         self.assertEqual(Person.surname.name, 'surname')
 
-        self.assertEqual(Person.entity_pk_name, 'pk')
+        self.assertEqual(Person.meta.pk.name, 'pk')
 
         p1 = Person(pk=1, firstname='Homer')
         p2 = Person(pk=2, firstname='Bart')
 
         self.assertEqual(p1.pk, 1)
-        self.assertEqual(p1.entity_pk_name, 'pk')
-        self.assertEqual(p1.entity_pk_value, 1)
+        self.assertEqual(p1.meta.pk.name, 'pk')
 
         self.assertEqual(p2.pk, 2)
-        self.assertEqual(p2.entity_pk_name, 'pk')
-        self.assertEqual(p2.entity_pk_value, 2)
+        self.assertEqual(p2.meta.pk.name, 'pk')
 
     def test_explicit_primary_key_detection_string (self):
-        class Person (Entity):
-            pk = Field(Integer)
-            firstname = Field(String, primary_key=True)
-            surname = Field(String)
-
-        self.assertFalse(Person.pk.is_primary_key)
-        self.assertTrue(Person.firstname.is_primary_key)
-        self.assertFalse(Person.surname.is_primary_key)
-
-        self.assertEqual(Person.pk.name, 'pk')
-        self.assertEqual(Person.firstname.name, 'firstname')
-        self.assertEqual(Person.surname.name, 'surname')
-
-        self.assertEqual(Person.entity_pk_name, 'firstname')
-
-        p1 = Person(pk=1, firstname='Homer')
-        p2 = Person(pk=2, firstname='Bart')
-
-        self.assertEqual(p1.firstname, 'Homer')
-        self.assertEqual(p1.entity_pk_name, 'firstname')
-        self.assertEqual(p1.entity_pk_value, 'Homer')
-
-        self.assertEqual(p2.firstname, 'Bart')
-        self.assertEqual(p2.entity_pk_name, 'firstname')
-        self.assertEqual(p2.entity_pk_value, 'Bart')
+        try:
+            class Person (Entity):
+                pk = Field(Integer)
+                firstname = Field(String, primary_key=True)
+                surname = Field(String)
+        except Exception, e:
+            self.assertTrue(isinstance(e, AttributeError))
+        else:
+            self.assertTrue(false)
 
     def test_explicit_primary_key_detection_string_no_pk_field (self):
         class Person (Entity):
@@ -120,18 +100,18 @@ class TestFieldConstraints (TestCase):
         self.assertEqual(Person.firstname.name, 'firstname')
         self.assertEqual(Person.surname.name, 'surname')
 
-        self.assertEqual(Person.entity_pk_name, 'firstname')
+        self.assertEqual(Person.meta.pk.name, 'firstname')
 
         p1 = Person(firstname='Homer')
         p2 = Person(firstname='Bart')
 
         self.assertEqual(p1.firstname, 'Homer')
-        self.assertEqual(p1.entity_pk_name, 'firstname')
-        self.assertEqual(p1.entity_pk_value, 'Homer')
+        self.assertEqual(p1.meta.pk.name, 'firstname')
+        self.assertEqual(p1.pk, 'Homer')
 
         self.assertEqual(p2.firstname, 'Bart')
-        self.assertEqual(p2.entity_pk_name, 'firstname')
-        self.assertEqual(p2.entity_pk_value, 'Bart')
+        self.assertEqual(p2.meta.pk.name, 'firstname')
+        self.assertEqual(p2.pk, 'Bart')
 
     def test_explicit_primary_key_uniqueness_integer (self):
         class Person (Entity):
@@ -153,23 +133,15 @@ class TestFieldConstraints (TestCase):
                                 surname='Simpson')
 
     def test_explicit_primary_key_uniqueness_string (self):
-        class Person (Entity):
-            pk = Field(Integer)
-            firstname = Field(String, primary_key=True)
-            surname = Field(String)
-
-        self.assertFalse(Person.pk.is_primary_key)
-        self.assertTrue(Person.firstname.is_primary_key)
-        self.assertFalse(Person.surname.is_primary_key)
-
-        p1 = Person(pk=1, firstname='Homer', surname='Simpson')
-        p2 = Person(pk=2, firstname='Bart', surname='Simpson')
-
-        self.assertEqual(p1.entity_pk_value, 'Homer')
-        self.assertEqual(p2.entity_pk_value, 'Bart')
-
-        self.assertRaises(ValueError, Person, pk=3, firstname='Bart',
-                                surname='Simpson')
+        try:
+            class Person (Entity):
+                pk = Field(Integer)
+                firstname = Field(String, primary_key=True)
+                surname = Field(String)
+        except Exception, e:
+            self.assertTrue(isinstance(e, AttributeError))
+        else:
+            self.assertTrue(false)
 
     def test_explicit_double_primary_key_keyerror (self):
         try:
@@ -178,15 +150,17 @@ class TestFieldConstraints (TestCase):
                 pks = Field(String, primary_key=True)
                 firstname = Field(String)
         except Exception, e:
-            self.assertTrue(isinstance(e, KeyError))
+            self.assertTrue(isinstance(e, AttributeError))
+        else:
+            self.assertTrue(false)
 
     def test_implicit_primary_key (self):
         class Person (Entity):
             firstname = Field(String)
             surname = Field(String)
 
-        self.assertEqual(Person.entity_pk_name, 'pk')
-        self.assertTrue(Person.entity_pk.is_primary_key)
+        self.assertEqual(Person.meta.pk.name, 'pk')
+        self.assertTrue(Person.meta.pk.is_primary_key)
         self.assertTrue(Person.pk.is_primary_key)
         self.assertFalse(Person.firstname.is_primary_key)
         self.assertFalse(Person.surname.is_primary_key)
@@ -407,6 +381,9 @@ class TestFieldConstraints (TestCase):
 
         p = Person(firstname='Homer', surname='Simpson')
 
+        self.assertTrue(Person.meta.singleton)
+        self.assertTrue(p.meta.singleton)
+
         self.assertRaises(ValueError, Person, firstname='Carl', surname='Carlson')
 
     def test_choices_not_singleton (self):
@@ -417,5 +394,9 @@ class TestFieldConstraints (TestCase):
 
         p1 = Person(firstname='Homer', surname='Simpson')
         p2 = Person(firstname='Bart', surname='Simpson')
+
+        self.assertFalse(Person.meta.singleton)
+        self.assertFalse(p1.meta.singleton)
+        self.assertFalse(p2.meta.singleton)
 
         self.assertRaises(ValueError, Person, firstname='Carl', surname='Carlson')

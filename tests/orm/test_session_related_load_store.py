@@ -190,24 +190,24 @@ class TestSessionRelatedLoadStore (TestCase):
         self.assertFalse(Session.default._stack.contains(na2))
 
         self.assertTrue(isinstance(np1, Person))
-        self.assertEqual(np1.entity_name, 'Person')
+        self.assertEqual(np1.meta.name, 'Person')
         self.assertEqual(np1.pk, 0)
         self.assertEqual(np1.firstname, 'Homer')
         self.assertEqual(np1.surname, 'Simpson')
 
         self.assertTrue(isinstance(na1, Account))
-        self.assertEqual(na1.entity_name, 'Account')
+        self.assertEqual(na1.meta.name, 'Account')
         self.assertEqual(na1.homedir, '/home/hsimpson')
         self.assertEqual(na1.person, np1)
 
         self.assertTrue(isinstance(np2, Person))
-        self.assertEqual(np2.entity_name, 'Person')
+        self.assertEqual(np2.meta.name, 'Person')
         self.assertEqual(np2.pk, 1)
         self.assertEqual(np2.firstname, 'Bart')
         self.assertEqual(np2.surname, 'Simpson')
 
         self.assertTrue(isinstance(na2, Account))
-        self.assertEqual(na2.entity_name, 'Account')
+        self.assertEqual(na2.meta.name, 'Account')
         self.assertEqual(na2.homedir, '/home/bsimpson')
         self.assertEqual(na2.person, np2)
 
@@ -254,23 +254,23 @@ class TestSessionRelatedLoadStore (TestCase):
         self.assertFalse(Session.default._stack.contains(na2))
 
         self.assertTrue(isinstance(np1, Person))
-        self.assertEqual(np1.entity_name, 'Person')
+        self.assertEqual(np1.meta.name, 'Person')
         self.assertEqual(np1.pk, 0)
         self.assertEqual(np1.firstname, 'Homer')
         self.assertEqual(np1.surname, 'Simpson')
 
         self.assertTrue(isinstance(na1, Account))
-        self.assertEqual(na1.entity_name, 'Account')
+        self.assertEqual(na1.meta.name, 'Account')
         self.assertEqual(na1.homedir, '/home/hsimpson')
 
         self.assertTrue(isinstance(np2, Person))
-        self.assertEqual(np2.entity_name, 'Person')
+        self.assertEqual(np2.meta.name, 'Person')
         self.assertEqual(np2.pk, 1)
         self.assertEqual(np2.firstname, 'Bart')
         self.assertEqual(np2.surname, 'Simpson')
 
         self.assertTrue(isinstance(na2, Account))
-        self.assertEqual(na2.entity_name, 'Account')
+        self.assertEqual(na2.meta.name, 'Account')
         self.assertEqual(na2.homedir, '/home/bsimpson')
 
     def test_session_get_from_disk (self):
@@ -310,23 +310,23 @@ class TestSessionRelatedLoadStore (TestCase):
         self.assertFalse(Session.default._stack.contains(na2))
 
         self.assertTrue(isinstance(np1, Person))
-        self.assertEqual(np1.entity_name, 'Person')
+        self.assertEqual(np1.meta.name, 'Person')
         self.assertEqual(np1.pk, 0)
         self.assertEqual(np1.firstname, 'Homer')
         self.assertEqual(np1.surname, 'Simpson')
 
         self.assertTrue(isinstance(na1, Account))
-        self.assertEqual(na1.entity_name, 'Account')
+        self.assertEqual(na1.meta.name, 'Account')
         self.assertEqual(na1.homedir, '/home/hsimpson')
 
         self.assertTrue(isinstance(np2, Person))
-        self.assertEqual(np2.entity_name, 'Person')
+        self.assertEqual(np2.meta.name, 'Person')
         self.assertEqual(np2.pk, 1)
         self.assertEqual(np2.firstname, 'Bart')
         self.assertEqual(np2.surname, 'Simpson')
 
         self.assertTrue(isinstance(na2, Account))
-        self.assertEqual(na2.entity_name, 'Account')
+        self.assertEqual(na2.meta.name, 'Account')
         self.assertEqual(na2.homedir, '/home/bsimpson')
 
     def test_session_store_recursive (self):

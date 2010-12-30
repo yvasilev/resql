@@ -144,13 +144,13 @@ class TestSessionIndependentLoadStore (TestCase):
         self.assertFalse(Session.default._stack.contains(np2))
 
         self.assertTrue(isinstance(np1, Person))
-        self.assertEqual(np1.entity_name, 'Person')
+        self.assertEqual(np1.meta.name, 'Person')
         self.assertEqual(np1.pk, 1)
         self.assertEqual(np1.firstname, 'Homer')
         self.assertEqual(np1.surname, 'Simpson')
 
         self.assertTrue(isinstance(np2, Person))
-        self.assertEqual(np2.entity_name, 'Person')
+        self.assertEqual(np2.meta.name, 'Person')
         self.assertEqual(np2.pk, 2)
         self.assertEqual(np2.firstname, 'Bart')
         self.assertEqual(np2.surname, 'Simpson')
@@ -180,13 +180,13 @@ class TestSessionIndependentLoadStore (TestCase):
         self.assertFalse(Session.default._stack.contains(np2))
 
         self.assertTrue(isinstance(np1, Person))
-        self.assertEqual(np1.entity_name, 'Person')
+        self.assertEqual(np1.meta.name, 'Person')
         self.assertEqual(np1.pk, 1)
         self.assertEqual(np1.firstname, 'Homer')
         self.assertEqual(np1.surname, 'Simpson')
 
         self.assertTrue(isinstance(np2, Person))
-        self.assertEqual(np2.entity_name, 'Person')
+        self.assertEqual(np2.meta.name, 'Person')
         self.assertEqual(np2.pk, 2)
         self.assertEqual(np2.firstname, 'Bart')
         self.assertEqual(np2.surname, 'Simpson')
@@ -217,13 +217,13 @@ class TestSessionIndependentLoadStore (TestCase):
         self.assertFalse(Session.default._stack.contains(np2))
 
         self.assertTrue(isinstance(np1, Person))
-        self.assertEqual(np1.entity_name, 'Person')
+        self.assertEqual(np1.meta.name, 'Person')
         self.assertEqual(np1.pk, 1)
         self.assertEqual(np1.firstname, 'Homer')
         self.assertEqual(np1.surname, 'Simpson')
 
         self.assertTrue(isinstance(np2, Person))
-        self.assertEqual(np2.entity_name, 'Person')
+        self.assertEqual(np2.meta.name, 'Person')
         self.assertEqual(np2.pk, 2)
         self.assertEqual(np2.firstname, 'Bart')
         self.assertEqual(np2.surname, 'Simpson')

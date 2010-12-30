@@ -38,7 +38,7 @@ class TestReferenceOneFieldsAccess (TestCase):
         r = ReferenceOne()
         r.bind_to_entity(Person)
 
-        r.set_data(p.entity_pk_value)
+        r.set_data(p.pk)
 
         self.assertTrue(isinstance(r.get_data(), Entity))
 
@@ -68,12 +68,12 @@ class TestReferenceOneFieldsAccess (TestCase):
         r = ReferenceOne()
         r.bind_to_entity(Person)
 
-        r.set_data(p1.entity_pk_value)
+        r.set_data(p1.pk)
 
         self.assertEqual(r.get_data().firstname, 'Homer')
         self.assertEqual(r.get_data().surname, 'Simpson')
 
-        r.set_data(p2.entity_pk_value)
+        r.set_data(p2.pk)
 
         self.assertEqual(r.get_data().firstname, 'Bart')
         self.assertEqual(r.get_data().surname, 'Simpson')

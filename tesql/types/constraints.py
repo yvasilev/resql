@@ -177,7 +177,7 @@ class ConstraintReferences (ConstraintByFunction):
 
         if hasattr(getattr(entity, field_name), 'inverse_name'):
             inverse_name = getattr(entity, field_name).inverse_name(
-                            entity.entity_name.lower())
+                            entity.meta.name.lower())
             inverse_name = self._target.register_inverse(inverse_name,
                             getattr(entity, field_name).inverse_type(),
                             entity=entity, inverse=field_name, virtual=True)

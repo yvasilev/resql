@@ -30,9 +30,9 @@ class SessionCache (dict):
     @staticmethod
     def etokey (entity, pk=None):
         if isinstance(entity, type):
-            return (entity.entity_name, pk)
+            return (entity.meta.name, pk)
         else:
-            return (entity.entity_name, entity.entity_pk_value)
+            return (entity.meta.name, entity.entity_pk_value)
 
     def append (self, entity, changed=False):
         self[self.etokey(entity)] = CachedInstance(entity, changed)
@@ -174,7 +174,7 @@ class Session (object):
         for location in self._strategy.list_location(entity):
             res.append(self._strategy.list_primary_key(entity, location))
 
-        for pk in (pk for e, pk in self._cache if e == entity.entity_name):
+        for pk in (pk for e, pk in self._cache if e == entity.meta.name):
             if pk not in res:
                 res.append(pk)
 

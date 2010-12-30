@@ -26,7 +26,7 @@ class TestEntityProperties (TestCase):
     def setUp (self):
         Session.default.expunge()
 
-    def test_entity_name_and_pk (self):
+    def test_entity_meta_name_and_pk (self):
         class Person (Entity):
             handle = Field(String, primary_key=True)
             firstname = Field(String)
@@ -34,9 +34,9 @@ class TestEntityProperties (TestCase):
 
         p = Person(handle='hsimpson', firstname='Homer', surname='Simpson')
 
-        self.assertEqual(p.entity_name, 'Person')
-        self.assertEqual(p.entity_pk_name, 'handle')
-        self.assertEqual(p.entity_pk_value, 'hsimpson')
+        self.assertEqual(p.meta.name, 'Person')
+        self.assertEqual(p.meta.pk.name, 'handle')
+        self.assertEqual(p.pk, 'hsimpson')
 
         class Account (Entity):
             handle = Field(String, primary_key=True)
@@ -44,13 +44,13 @@ class TestEntityProperties (TestCase):
 
         a = Account(handle='bsimpson', homedir='/home/hsimpson')
 
-        self.assertEqual(p.entity_name, 'Person')
-        self.assertEqual(p.entity_pk_name, 'handle')
-        self.assertEqual(p.entity_pk_value, 'hsimpson')
+        self.assertEqual(p.meta.name, 'Person')
+        self.assertEqual(p.meta.pk.name, 'handle')
+        self.assertEqual(p.pk, 'hsimpson')
 
-        self.assertEqual(a.entity_name, 'Account')
-        self.assertEqual(a.entity_pk_name, 'handle')
-        self.assertEqual(a.entity_pk_value, 'bsimpson')
+        self.assertEqual(a.meta.name, 'Account')
+        self.assertEqual(a.meta.pk.name, 'handle')
+        self.assertEqual(a.pk, 'bsimpson')
 
     def test_entity_as_dictionary (self):
         class Person (Entity):

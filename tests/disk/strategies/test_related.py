@@ -296,7 +296,7 @@ class TestIndependent (TestCase):
         np2 = s.load_location(Person, 2)
 
         self.assertTrue(isinstance(np1, list))
-        self.assertEqual(np1[0].entity_name, 'Person')
+        self.assertEqual(np1[0].meta.name, 'Person')
         self.assertEqual(np1[0].pk, 1)
         self.assertEqual(np1[0].firstname, 'Homer')
         self.assertEqual(np1[0].surname, 'Simpson')
@@ -304,7 +304,7 @@ class TestIndependent (TestCase):
         self.assertEqual(np1[1].person, np1[0])
 
         self.assertTrue(isinstance(np2, list))
-        self.assertEqual(np2[0].entity_name, 'Person')
+        self.assertEqual(np2[0].meta.name, 'Person')
         self.assertEqual(np2[0].pk, 2)
         self.assertEqual(np2[0].firstname, 'Bart')
         self.assertEqual(np2[0].surname, 'Simpson')
@@ -426,7 +426,7 @@ class TestIndependent (TestCase):
         np2 = s.load_location(Person, 1)
 
         self.assertTrue(isinstance(np1, list))
-        self.assertEqual(np1[0].entity_name, 'Person')
+        self.assertEqual(np1[0].meta.name, 'Person')
         self.assertEqual(np1[0].pk, 0)
         self.assertEqual(np1[0].firstname, 'Homer')
         self.assertEqual(np1[0].surname, 'Simpson')
@@ -434,7 +434,7 @@ class TestIndependent (TestCase):
         self.assertEqual(np1[1].person, np1[0])
 
         self.assertTrue(isinstance(np2, list))
-        self.assertEqual(np2[0].entity_name, 'Person')
+        self.assertEqual(np2[0].meta.name, 'Person')
         self.assertEqual(np2[0].pk, 1)
         self.assertEqual(np2[0].firstname, 'Bart')
         self.assertEqual(np2[0].surname, 'Simpson')

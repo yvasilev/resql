@@ -37,7 +37,7 @@ class TestReferenceManyFieldsAccess (TestCase):
         r = ReferenceMany()
         r.bind_to_entity(Person)
 
-        r.set_data([p.entity_pk_value])
+        r.set_data([p.pk])
 
         self.assertTrue(isinstance(r.get_data(), ReferenceMany))
         self.assertTrue(isinstance(r[0], Entity))
@@ -71,7 +71,7 @@ class TestReferenceManyFieldsAccess (TestCase):
         self.assertFalse(p1 in r)
         self.assertFalse(p2 in r)
 
-        r.set_data([p1.entity_pk_value])
+        r.set_data([p1.pk])
 
         self.assertTrue(p1 in r)
         self.assertFalse(p2 in r)
@@ -79,7 +79,7 @@ class TestReferenceManyFieldsAccess (TestCase):
         self.assertEqual(r[0].firstname, 'Homer')
         self.assertEqual(r[0].surname, 'Simpson')
 
-        r.set_data([p2.entity_pk_value])
+        r.set_data([p2.pk])
 
         self.assertFalse(p1 in r)
         self.assertTrue(p2 in r)
@@ -87,7 +87,7 @@ class TestReferenceManyFieldsAccess (TestCase):
         self.assertEqual(r[0].firstname, 'Bart')
         self.assertEqual(r[0].surname, 'Simpson')
 
-        r.append(p1.entity_pk_value)
+        r.append(p1.pk)
 
         self.assertTrue(p1 in r)
         self.assertTrue(p2 in r)

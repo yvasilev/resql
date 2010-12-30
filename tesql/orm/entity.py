@@ -43,11 +43,10 @@ class EntityMeta (type):
             if isinstance(value, Field):
                 cls._register_field(key, value)
 
-        if not cls.entity_pk_name:
-            # FIXME: Check that I'm not overwriting 'pk'
+        if not cls._pk_name:
             setattr(cls, 'pk', Field(Indexer, primary_key=True, autoincrement=True))
             cls._register_field('pk', getattr(cls, 'pk'))
-            cls.entity_pk._position = -1
+            cls.meta.pk._position = -1
 
         cls._field_order = tuple(k for k, o in sorted([(x, v._position)
                 for x, v in cls._fields.iteritems()], lambda x, y: x[1] - y[1]))
@@ -66,8 +65,10 @@ class EntityMeta (type):
 
         if cls._fields[field.name].is_primary_key:
             if cls._pk_name:
-                raise KeyError('Only one primary_key per Entity alowed.')
+                raise AttributeError('Only one primary_key per Entity alowed.')
             cls._pk_name = field.name
+        elif field.name is 'pk':
+            raise AttributeError('"pk" field name is reserved for primary keys')
 
     def _constraint_fields (cls):
         for field in cls._fields.itervalues():
@@ -120,8 +121,22 @@ class EntityMeta (type):
         return cls.query.filter_by(*filters).one()
 
     @property
-    def entity_name (cls):
-        return cls._entity_name
+    def meta (cls):
+        class EntityMetaDataMeta (type):
+
+            @property
+            def name (metacls):
+                return cls._entity_name
+
+            @property
+            def pk (metacls):
+                return cls._fields[cls._pk_name]
+
+            @property
+            def singleton (metacls):
+                return metacls.pk.is_singleton
+
+        return EntityMetaDataMeta('EntityMetaData', (object,), {})
 
     @property
     def entity_pk (cls):
@@ -130,10 +145,6 @@ class EntityMeta (type):
     @property
     def entity_pk_name (cls):
         return cls._pk_name
-
-    @property
-    def entity_is_singleton (cls):
-        return cls.entity_pk.is_singleton
 
     @property
     def entity_has_foreign_key (cls):
@@ -157,14 +168,14 @@ class Entity (object):
         self._fields = dict((k, v.field) for k, v in
                             type(self)._fields.iteritems())
 
-        if self.entity_pk_name in fields:
-            pk = fields.get(self.entity_pk_name)
+        if self.meta.pk.name in fields:
+            pk = fields.get(self.meta.pk.name)
             if isinstance(pk, BaseObject):
-                self._fields[self.entity_pk_name].set_data(
-                        self.entity_pk.unmarshal(pk), check=check)
+                self._fields[self.meta.pk.name].set_data(
+                        self.meta.pk.unmarshal(pk), check=check)
             else:
-                self._fields[self.entity_pk_name].set_data(pk, check=check)
-        elif type(self).entity_pk.is_autoincrementing and \
+                self._fields[self.meta.pk.name].set_data(pk, check=check)
+        elif self.meta.pk.is_autoincrementing and \
            hasattr(self.entity_pk, 'set_next'):
             self.entity_pk.set_next(type(self))
 
@@ -191,7 +202,7 @@ class Entity (object):
         if not isinstance(other, Entity):
             return False
 
-        if self.entity_name != other.entity_name:
+        if self.meta.name != other.meta.name:
             return False
 
         return self.entity_pk_value == other.entity_pk_value
@@ -200,8 +211,13 @@ class Entity (object):
         return not self.__eq__(other)
 
     @property
-    def entity_name (self):
-        return type(self).entity_name
+    def meta (self):
+        class InstanceEntityMetaDataMeta (type(type(self).meta)):
+
+            def touch (metacls):
+                Session.default.modify(self, changed=True)
+
+        return InstanceEntityMetaDataMeta('InstanceEntityMetaData', (object,), {})
 
     @property
     def entity_pk (self):
@@ -219,10 +235,6 @@ class Entity (object):
             return self.entity_pk.get_data()
 
     @property
-    def entity_is_singleton (self):
-        return type(self).entity_pk.is_singleton
-
-    @property
     def entity_has_foreign_key (self):
         return type(self).entity_pk.is_foreign_key
 
@@ -232,7 +244,7 @@ class Entity (object):
 
     @property
     def entity_as_dictionary (self):
-        res = make_object(self.entity_name, {})
+        res = make_object(self.meta.name, {})
 
         for name in type(self)._field_order:
             if not type(self)._fields[name].is_virtual:
@@ -241,14 +253,12 @@ class Entity (object):
         return res
 
     def field_get (self, name):
+        name = name == 'pk' and self.meta.pk.name or name
         return self._fields[name].get_data(instance=self)
 
     def field_set (self, name, value, check=True):
         self._fields[name].set_data(value, check=check, instance=self)
-        self.entity_mark_as_modified()
-
-    def entity_mark_as_modified (self):
-        Session.default.modify(self, changed=True)
+        self.meta.touch()
 
 
 from tesql import __author__, __license__, __version__

@@ -51,8 +51,8 @@ class BaseDiskStrategy (object):
         res = []
         for obj in dicts:
             objentity = tesql.orm.Entity.get_entity_type_by_name(obj.name)
-            if objentity.entity_pk_name not in obj:
-                obj[objentity.entity_pk_name] = str(pk)
+            if objentity.meta.pk.name not in obj:
+                obj[objentity.meta.pk.name] = str(pk)
 
             res.append(tesql.orm.Entity.get_entity_from_dictionary(obj))
 

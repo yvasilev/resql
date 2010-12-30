@@ -45,18 +45,18 @@ class Related (BaseDiskStrategy):
 
     def bind_entity (self, entity, location):
         if isinstance(location, basestring):
-            self._bind_entity_helper(entity.entity_name, location)
+            self._bind_entity_helper(entity.meta.name, location)
         else:
             for k, v in location.iteritems():
                 if k == None:
-                    key = entity.entity_name
+                    key = entity.meta.name
                 else:
-                    key = (entity.entity_name, k)
+                    key = (entity.meta.name, k)
                 self._bind_entity_helper(key, v)
 
     def unbind_entity (self, entity):
-        if entity.entity_name in self._locations:
-            del self._locations[entity.entity_name]
+        if entity.meta.name in self._locations:
+            del self._locations[entity.meta.name]
 
     @property
     def base_location (self):
@@ -72,15 +72,15 @@ class Related (BaseDiskStrategy):
         if isinstance(entity, tesql.orm.Entity):
             pk = entity.entity_pk_value
 
-        if (entity.entity_name, pk) in self._locations:
-            location = self._locations[entity.entity_name, pk]
+        if (entity.meta.name, pk) in self._locations:
+            location = self._locations[entity.meta.name, pk]
         else:
-            if entity.entity_name in self._locations:
-                location = self._locations[entity.entity_name]
+            if entity.meta.name in self._locations:
+                location = self._locations[entity.meta.name]
             else:
-                location = os.path.join(self.base_location, entity.entity_name)
+                location = os.path.join(self.base_location, entity.meta.name)
 
-            if entity.entity_is_singleton:
+            if entity.meta.singleton:
                 location = location + '.conf'
             else:
                 if pk != None:
@@ -111,7 +111,7 @@ class Related (BaseDiskStrategy):
                 for path in res:
                     dicts = self.load_location_as_dictionaries(path)
                     # FIXME: add dicts to session
-                    if any(x.name == entity.entity_name for x in dicts):
+                    if any(x.name == entity.meta.name for x in dicts):
                         nres.append(path)
 
                 res = nres
@@ -121,14 +121,14 @@ class Related (BaseDiskStrategy):
             if res and entity.entity_has_foreign_key:
                 dicts = self.load_location_as_dictionaries(location)
                 # FIXME: add dicts to session
-                res = any(x.name == entity.entity_name for x in dicts) and \
+                res = any(x.name == entity.meta.name for x in dicts) and \
                     res or None
 
         return res
 
     def list_primary_key (self, entity, location):
-        base = entity.entity_name in self._locations and \
-               self._locations[entity.entity_name] or self.base_location
+        base = entity.meta.name in self._locations and \
+               self._locations[entity.meta.name] or self.base_location
 
         if not location.startswith(base):
             raise ValueError("Location '%s' is not reversible." % location)
