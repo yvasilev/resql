@@ -23,8 +23,12 @@ from tesql.disk.objects import BaseObject
 from tesql.query import Filter
 
 
-def exportedmethod (func):
+def exportedmethod (func, name=None, prefix='field_'):
     func._exported = True
+    if not name:
+        name = func.func_name.startswith(prefix) and \
+               func.func_name[len(prefix):] or func.func_name
+    func.func_name = name
     return staticmethod(func)
 
 class BaseType (object):
@@ -50,21 +54,13 @@ class BaseType (object):
         self._data = state['data']
         self._constraints = state['constraints']
 
-    #@exportedmethod
-    #def __eq__ (self, other):
-    #    return Filter(lambda x: x.field_get(self.name) == other)
+    @exportedmethod
+    def field___eq__ (self, other):
+        return Filter(lambda x: x.field_get(self.name) == other)
 
-    @staticmethod
-    def register_methods (field_type):
-
-        def __eq__ (self, other):
-            return Filter(lambda x: x.field_get(self.name) == other)
-
-        def __ne__ (self, other):
-            return Filter(lambda x: x.field_get(self.name) != other)
-
-        field_type.__eq__ = __eq__.__get__(None, field_type)
-        field_type.__ne__ = __ne__.__get__(None, field_type)
+    @exportedmethod
+    def field___ne__ (self, other):
+        return Filter(lambda x: x.field_get(self.name) != other)
 
     def add_constraint (self, constraint):
         if 'item' in constraint.scope:
@@ -144,19 +140,14 @@ class BaseReference (BaseType):
         self.bind_to_entity(state['target'])
         self.bind_to_inverse(state['inverse'])
 
-    @staticmethod
-    def register_methods (field_type):
-        super(BaseReference, BaseReference).register_methods(field_type)
+    @exportedmethod
+    def field_bind_to_entity (self, target):
+        self._field.bind_to_entity(target)
+        self._bound_entity = target
 
-        def bind_to_entity (self, target):
-            self._field.bind_to_entity(target)
-            self._bound_entity = target
-
-        def bind_to_inverse (self, target):
-            self._field.bind_to_inverse(target)
-
-        field_type.bind_to_entity = bind_to_entity.__get__(None, field_type)
-        field_type.bind_to_inverse = bind_to_inverse.__get__(None, field_type)
+    @exportedmethod
+    def field_bind_to_inverse (self, target):
+        self._field.bind_to_inverse(target)
 
     def bind_to_entity (self, target):
         self._entity = target

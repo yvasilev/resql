@@ -39,8 +39,6 @@ class Field (object):
 
         if name not in Field._subclasses:
             Field._subclasses[name] = type(name, (Field,), {})
-            # FIXME: Migrate to exportedmethod and stop calling register_methods
-            field_type.register_methods(Field._subclasses[name])
             # Find @exportedmethod fuctions
             for func in (m for name, m in inspect.getmembers(field_type,
                          inspect.isfunction) if hasattr(m, '_exported')):
