@@ -122,21 +122,21 @@ class EntityMeta (type):
 
     @property
     def meta (cls):
-        class EntityMetaDataMeta (type):
+        class EntityMetaData (object):
 
             @property
-            def name (metacls):
+            def name (metaself):
                 return cls._entity_name
 
             @property
-            def pk (metacls):
+            def pk (metaself):
                 return cls._fields[cls._pk_name]
 
             @property
-            def singleton (metacls):
-                return metacls.pk.is_singleton
+            def singleton (metaself):
+                return metaself.pk.is_singleton
 
-        return EntityMetaDataMeta('EntityMetaData', (object,), {})
+        return EntityMetaData()
 
     @property
     def entity_pk (cls):
@@ -208,12 +208,12 @@ class Entity (object):
 
     @property
     def meta (self):
-        class InstanceEntityMetaDataMeta (type(type(self).meta)):
+        class InstanceEntityMetaData (type(type(self).meta)):
 
-            def touch (metacls):
+            def touch (metaself):
                 Session.default.modify(self, changed=True)
 
-        return InstanceEntityMetaDataMeta('InstanceEntityMetaData', (object,), {})
+        return InstanceEntityMetaData()
 
     @property
     def entity_pk (self):
@@ -243,6 +243,7 @@ class Entity (object):
                 res.append(name, make_object(name, self._fields[name].marshal()))
 
         return res
+        
 
     def field_get (self, name):
         name = name == 'pk' and self.meta.pk.name or name
