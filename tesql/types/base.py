@@ -30,6 +30,7 @@ def exportedmethod (func):
 class BaseType (object):
 
     def __init__ (self):
+        super(BaseType, self).__init__()
         self._outcoding = 'utf-8'
         self._incoding = 'utf-8'
         self._constraints = []

@@ -125,16 +125,26 @@ class EntityMeta (type):
         class EntityMetaData (object):
 
             @property
-            def name (metaself):
+            def name (self):
                 return cls._entity_name
 
             @property
-            def pk (metaself):
+            def singleton (self):
+                return self.pk.is_singleton
+
+            @property
+            def pk (self):
                 return cls._fields[cls._pk_name]
 
             @property
-            def singleton (metaself):
-                return metaself.pk.is_singleton
+            def fields (self):
+                class EntityFieldsData (list):
+
+                    def __init__ (self):
+                        for name in cls._field_order:
+                            self.append(cls._fields[name])
+
+                return EntityFieldsData()
 
         return EntityMetaData()
 
@@ -228,22 +238,25 @@ class Entity (object):
 
     @property
     def entity_has_foreign_key (self):
-        return type(self).entity_pk.is_foreign_key
+        return self.meta.pk.is_foreign_key
 
     @property
     def entity_foreign_key_entity (self):
-        return type(self).entity_pk.foreign_key_entity
+        return self.meta.pk.foreign_key_entity
 
     @property
     def entity_as_dictionary (self):
         res = make_object(self.meta.name, {})
 
-        for name in type(self)._field_order:
-            if not type(self)._fields[name].is_virtual:
-                res.append(name, make_object(name, self._fields[name].marshal()))
+        for name, data in self:
+            res.append(name, make_object(name, data))
 
         return res
-        
+
+    def __iter__ (self):
+        for field in self.meta.fields:
+            if not field.is_virtual:
+                yield (field.name, self._fields[field.name].marshal())
 
     def field_get (self, name):
         name = name == 'pk' and self.meta.pk.name or name
